@@ -9,8 +9,12 @@ export const useGeoEnrichment = () => {
     if (baseData.lat && baseData.lon) {
       try {
         const geoRes = await axios.get(nominatimUrl, {
-          params: { lat: baseData.lat, lon: baseData.lon, format: 'json' },
-          headers: { 'Accept-Language': 'en' }
+          params: { 
+            lat: baseData.lat, 
+            lon: baseData.lon, 
+            format: 'json',
+            'accept-language': 'en'
+          }
         });
 
         if (geoRes.data && !geoRes.data.error) {

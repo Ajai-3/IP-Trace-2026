@@ -49,14 +49,31 @@ export const useIpTrace = () => {
           timezone: 'Calculated'
         };
       } else {
-        const response = await api.get(`${query}`, {
-          params: {
-            fields: 'status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,as,mobile,proxy,hosting,query'
-          }
-        });
+        const url = query ? `${query}/json/` : 'json/';
+        const response = await api.get(url);
+        const res = response.data;
         
-        if (response.data.status === 'fail') throw new Error(response.data.message || 'IDENTIFICATION FAILED');
-        baseData = response.data;
+        if (res.error) throw new Error(res.reason || 'IDENTIFICATION FAILED');
+        
+        // Map ipapi.co to our IpApiResponse interface
+        baseData = {
+          status: 'success',
+          country: res.country_name,
+          countryCode: res.country_code,
+          regionName: res.region,
+          city: res.city,
+          zip: res.postal,
+          lat: res.latitude,
+          lon: res.longitude,
+          timezone: res.timezone || 'UTC',
+          isp: res.org || 'Unknown ISP',
+          org: res.org || 'Unknown Org',
+          as: res.asn || 'N/A',
+          query: res.ip,
+          proxy: false, // ipapi.co free doesn't provide these easily
+          hosting: false,
+          mobile: false
+        };
       }
 
       const enrichedData = await enrichData(baseData);
